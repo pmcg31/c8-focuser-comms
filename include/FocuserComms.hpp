@@ -34,6 +34,8 @@ namespace ELS
         bool microsteps(Microsteps ms);
         bool maxPos(uint32_t position);
         bool speed(FocusSpeed speed);
+        bool backlashEnabled(bool isEnabled);
+        bool backlashSteps(uint32_t steps);
 
     private:
         void dispatch(int msgId, int compCnt, const char *components[]);
@@ -50,6 +52,10 @@ namespace ELS
         bool decodeGetMaxPosMessage(int compCnt, const char **components);
         bool decodeSetSpeedMessage(int compCnt, const char **components);
         bool decodeGetSpeedMessage(int compCnt, const char **components);
+        bool decodeEnableBacklashMessage(int compCnt, const char **components);
+        bool decodeGetBacklashEnabledMessage(int compCnt, const char **components);
+        bool decodeSetBacklashStepsMessage(int compCnt, const char **components);
+        bool decodeGetBacklashStepsMessage(int compCnt, const char **components);
 
     private:
         CommsWriter *_writer;

@@ -18,5 +18,7 @@ namespace ELS
         virtual void microsteps(Microsteps ms) = 0;
         virtual void maxPos(uint32_t position) = 0;
         virtual void speed(FocusSpeed speed) = 0;
+        virtual void backlashEnabled(bool isEnabled) = 0;
+        virtual void backlashSteps(uint32_t steps) = 0;
     };
 }

@@ -28,7 +28,11 @@ namespace ELS
         &FocuserComms::decodeGetMotorMovingMessage,
         &FocuserComms::decodeGetMaxPosMessage,
         &FocuserComms::decodeSetSpeedMessage,
-        &FocuserComms::decodeGetSpeedMessage};
+        &FocuserComms::decodeGetSpeedMessage,
+        &FocuserComms::decodeEnableBacklashMessage,
+        &FocuserComms::decodeGetBacklashEnabledMessage,
+        &FocuserComms::decodeSetBacklashStepsMessage,
+        &FocuserComms::decodeGetBacklashStepsMessage};
 
     FocuserComms::FocuserComms(CommsWriter *writer,
                                FocuserCommsListener *listener)
@@ -162,6 +166,24 @@ namespace ELS
         return _writer->writeLine(__msg);
     }
 
+    bool FocuserComms::backlashEnabled(bool isEnabled)
+    {
+        sprintf(__msg, "%02d %d",
+                FHMI_BACKLASH_ENABLED,
+                isEnabled ? 1 : 0);
+
+        return _writer->writeLine(__msg);
+    }
+
+    bool FocuserComms::backlashSteps(uint32_t steps)
+    {
+        sprintf(__msg, "%02d %u",
+                FHMI_BACKLASH_STEPS,
+                steps);
+
+        return _writer->writeLine(__msg);
+    }
+
     bool FocuserComms::decodeFocusRelMessage(int compCnt,
                                              const char **components)
     {
@@ -223,7 +245,7 @@ namespace ELS
     bool FocuserComms::decodeEnableMotorMessage(int compCnt,
                                                 const char **components)
     {
-        // ENABLE_MOTOR isEnabled
+        // ENABLE_MOTOR <isEnabled>
         if (compCnt != 2)
         {
             return false;
@@ -378,6 +400,78 @@ namespace ELS
         }
 
         _listener->getSpeed();
+
+        return true;
+    }
+
+    bool FocuserComms::decodeEnableBacklashMessage(int compCnt,
+                                                   const char **components)
+    {
+        // ENABLE_BACKLASH <isEnabled>
+        if (compCnt != 2)
+        {
+            return false;
+        }
+
+        char *endptr = 0;
+        uint32_t isEnabled = strtoul(components[1], &endptr, 10);
+
+        if (endptr == components[1])
+        {
+            return false;
+        }
+
+        _listener->enableBacklash(isEnabled == 1);
+
+        return true;
+    }
+
+    bool FocuserComms::decodeGetBacklashEnabledMessage(int compCnt,
+                                                       const char ** /* components */)
+    {
+        // GET_BACKLASH_ENABLED
+        if (compCnt != 1)
+        {
+            return false;
+        }
+
+        _listener->getBacklashEnabled();
+
+        return true;
+    }
+
+    bool FocuserComms::decodeSetBacklashStepsMessage(int compCnt,
+                                                     const char **components)
+    {
+        // SET_BACKLASH_STEPS <steps>
+        if (compCnt != 2)
+        {
+            return false;
+        }
+
+        char *endptr = 0;
+        uint32_t steps = strtoul(components[1], &endptr, 10);
+
+        if (endptr == components[1])
+        {
+            return false;
+        }
+
+        _listener->setBacklashSteps(steps);
+
+        return true;
+    }
+
+    bool FocuserComms::decodeGetBacklashStepsMessage(int compCnt,
+                                                     const char ** /* components */)
+    {
+        // GET_BACKLASH_STEPS
+        if (compCnt != 1)
+        {
+            return false;
+        }
+
+        _listener->getBacklashSteps();
 
         return true;
     }

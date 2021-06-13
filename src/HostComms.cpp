@@ -24,7 +24,9 @@ namespace ELS
         &HostComms::decodePositionMessage,
         &HostComms::decodeMicrostepsMessage,
         &HostComms::decodeMaxPosMessage,
-        &HostComms::decodeSpeedMessage};
+        &HostComms::decodeSpeedMessage,
+        &HostComms::decodeBacklashEnabledMessage,
+        &HostComms::decodeBacklashStepsMessage};
 
     HostComms::HostComms(CommsWriter *writer,
                          HostCommsListener *listener)
@@ -175,6 +177,40 @@ namespace ELS
     {
         sprintf(__msg, "%02d",
                 HFMI_GET_SPEED);
+
+        return _writer->writeLine(__msg);
+    }
+
+    bool HostComms::enableBacklash(bool isEnabled)
+    {
+        sprintf(__msg, "%02d %d",
+                HFMI_ENABLE_BACKLASH,
+                isEnabled ? 1 : 0);
+
+        return _writer->writeLine(__msg);
+    }
+
+    bool HostComms::getBacklashEnabled()
+    {
+        sprintf(__msg, "%02d",
+                HFMI_GET_BACKLASH_ENABLED);
+
+        return _writer->writeLine(__msg);
+    }
+
+    bool HostComms::setBacklashSteps(uint32_t steps)
+    {
+        sprintf(__msg, "%02d %u",
+                HFMI_SET_BACKLASH_STEPS,
+                steps);
+
+        return _writer->writeLine(__msg);
+    }
+
+    bool HostComms::getBacklashSteps()
+    {
+        sprintf(__msg, "%02d",
+                HFMI_GET_BACKLASH_STEPS);
 
         return _writer->writeLine(__msg);
     }
@@ -355,7 +391,7 @@ namespace ELS
                                        const char **components)
     {
         // SPEED <speed-enum>
-          if (compCnt != 2)
+        if (compCnt != 2)
         {
             return false;
         }
@@ -370,6 +406,50 @@ namespace ELS
         _listener->speed((FocusSpeed)speedEnumIdx);
 
         return true;
-  }
+    }
+
+    bool HostComms::decodeBacklashEnabledMessage(int compCnt,
+                                                 const char **components)
+    {
+        // BACKLASH_ENABLED <isEnabled>
+        if (compCnt != 2)
+        {
+            return false;
+        }
+
+        char *endptr = 0;
+        uint32_t isEnabled = strtoul(components[1], &endptr, 10);
+
+        if (endptr == components[1])
+        {
+            return false;
+        }
+
+        _listener->backlashEnabled(isEnabled == 1);
+
+        return true;
+    }
+
+    bool HostComms::decodeBacklashStepsMessage(int compCnt,
+                                               const char **components)
+    {
+        // BACKLASH_STEPS <steps>
+        if (compCnt != 2)
+        {
+            return false;
+        }
+
+        char *endptr = 0;
+        uint32_t steps = strtoul(components[1], &endptr, 10);
+
+        if (endptr == components[1])
+        {
+            return false;
+        }
+
+        _listener->backlashSteps(steps);
+
+        return true;
+    }
 
 }

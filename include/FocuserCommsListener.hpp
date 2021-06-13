@@ -22,6 +22,10 @@ namespace ELS
         virtual void getMaxPos() = 0;
         virtual void setSpeed(FocusSpeed speed) = 0;
         virtual void getSpeed() = 0;
+        virtual void enableBacklash(bool isEnabled) = 0;
+        virtual void getBacklashEnabled() = 0;
+        virtual void setBacklashSteps(uint32_t steps) = 0;
+        virtual void getBacklashSteps() = 0;
     };
 
 }

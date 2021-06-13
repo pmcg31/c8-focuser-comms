@@ -38,6 +38,10 @@ namespace ELS
         bool getMaxPos();
         bool setSpeed(FocusSpeed speed);
         bool getSpeed();
+        bool enableBacklash(bool isEnabled);
+        bool getBacklashEnabled();
+        bool setBacklashSteps(uint32_t steps);
+        bool getBacklashSteps();
 
     private:
         bool decodeMovingRelMessage(int compCnt, const char **components);
@@ -49,6 +53,8 @@ namespace ELS
         bool decodeMicrostepsMessage(int compCnt, const char **components);
         bool decodeMaxPosMessage(int compCnt, const char **components);
         bool decodeSpeedMessage(int compCnt, const char **components);
+        bool decodeBacklashEnabledMessage(int compCnt, const char **components);
+        bool decodeBacklashStepsMessage(int compCnt, const char **components);
 
     private:
         CommsWriter *_writer;
